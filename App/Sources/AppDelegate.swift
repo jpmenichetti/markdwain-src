@@ -121,6 +121,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation, 
 
     @objc func toggleTOC(_ sender: Any?) { Prefs.sidebarVisible.toggle() }
 
+    @objc func showFind(_ sender: Any?) { current?.showFind() }
+    @objc func findNext(_ sender: Any?) { current?.find(backwards: false) }
+    @objc func findPrevious(_ sender: Any?) { current?.find(backwards: true) }
+
     // MARK: - Zoom (global, see Prefs)
 
     @objc func zoomIn(_ sender: Any?) { Prefs.zoomPercent += 10 }
@@ -137,7 +141,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation, 
 
     func validateMenuItem(_ item: NSMenuItem) -> Bool {
         switch item.action {
-        case #selector(revealInFinder(_:)), #selector(openWith(_:)), #selector(toggleTOC(_:)): return current != nil
+        case #selector(revealInFinder(_:)), #selector(openWith(_:)), #selector(toggleTOC(_:)),
+             #selector(showFind(_:)), #selector(findNext(_:)), #selector(findPrevious(_:)): return current != nil
         default: return true
         }
     }

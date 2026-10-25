@@ -25,7 +25,7 @@ private final class WeakScriptHandler: NSObject, WKScriptMessageHandler {
 }
 
 /// Window controller for a single Markdown file.
-final class ViewerWindowController: NSWindowController, NSWindowDelegate, WKNavigationDelegate, WKScriptMessageHandler, NSToolbarDelegate {
+final class ViewerWindowController: NSWindowController, NSWindowDelegate, WKNavigationDelegate, WKScriptMessageHandler, NSToolbarDelegate, NSSearchFieldDelegate {
     let fileURL: URL
     /// Called when the window closes so AppDelegate can forget it.
     var onClose: (() -> Void)?
@@ -36,6 +36,16 @@ final class ViewerWindowController: NSWindowController, NSWindowDelegate, WKNavi
     private var pageLoaded = false
     private var reloadPending = false
     private var missing = false
+    private var findAccessory: NSTitlebarAccessoryViewController?
+    private lazy var findField: NSSearchField = {
+        let field = NSSearchField()
+        field.placeholderString = "Find in page"
+        field.delegate = self
+        field.target = self
+        field.action = #selector(findSubmitted(_:))
+        field.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        return field
+    }()
     private static let toggleTOCItem = NSToolbarItem.Identifier("toggleTOC")
 
     // MARK: - Setup
@@ -131,6 +141,68 @@ final class ViewerWindowController: NSWindowController, NSWindowDelegate, WKNavi
     // MARK: - Actions (reached via the responder chain from menu items)
 
     @objc func toggleTOC(_ sender: Any?) { Prefs.sidebarVisible.toggle() }
+
+    // MARK: - Find
+    // WKWebView on macOS does not implement the standard NSTextFinder menu actions, so ⌘F is a small native bar
+    // in the titlebar area that drives WKWebView.find (which highlights, selects and scrolls to each match).
+
+    /// Shows the find bar (⌘F) and focuses its field; if already visible, just refocuses it.
+    func showFind() {
+        guard let window else { return }
+        if findAccessory == nil {
+            let prev = NSButton(image: NSImage(systemSymbolName: "chevron.up", accessibilityDescription: "Previous match")!, target: self, action: #selector(findPreviousAction(_:)))
+            let next = NSButton(image: NSImage(systemSymbolName: "chevron.down", accessibilityDescription: "Next match")!, target: self, action: #selector(findNextAction(_:)))
+            let done = NSButton(title: "Done", target: self, action: #selector(hideFindAction(_:)))
+            [prev, next].forEach { $0.bezelStyle = .texturedRounded }
+            let stack = NSStackView(views: [findField, prev, next, done])
+            stack.orientation = .horizontal
+            stack.spacing = 8
+            stack.edgeInsets = NSEdgeInsets(top: 6, left: 12, bottom: 6, right: 12)
+            let accessory = NSTitlebarAccessoryViewController()
+            accessory.layoutAttribute = .bottom
+            accessory.view = stack
+            window.addTitlebarAccessoryViewController(accessory)
+            findAccessory = accessory
+        }
+        window.makeFirstResponder(findField)
+        findField.selectText(nil)
+    }
+
+    /// Finds the next/previous match of the field's text (wraps around, case-insensitive). Red text = no match.
+    func find(backwards: Bool) {
+        let query = findField.stringValue
+        guard !query.isEmpty else { return }
+        let config = WKFindConfiguration()
+        config.backwards = backwards
+        config.wraps = true
+        webView.find(query, configuration: config) { [weak self] result in
+            self?.findField.textColor = result.matchFound ? .labelColor : .systemRed
+        }
+    }
+
+    private func hideFind() {
+        guard let accessory = findAccessory, let window else { return }
+        if let index = window.titlebarAccessoryViewControllers.firstIndex(of: accessory) {
+            window.removeTitlebarAccessoryViewController(at: index)
+        }
+        findAccessory = nil
+        window.makeFirstResponder(webView)
+    }
+
+    /// Return in the field = next match, ⇧Return = previous.
+    @objc private func findSubmitted(_ sender: Any?) { find(backwards: NSEvent.modifierFlags.contains(.shift)) }
+    @objc private func findNextAction(_ sender: Any?) { find(backwards: false) }
+    @objc private func findPreviousAction(_ sender: Any?) { find(backwards: true) }
+    @objc private func hideFindAction(_ sender: Any?) { hideFind() }
+
+    func controlTextDidChange(_ obj: Notification) { find(backwards: false) } // search as you type
+
+    /// Esc closes the bar.
+    func control(_ control: NSControl, textView: NSTextView, doCommandBy selector: Selector) -> Bool {
+        guard selector == #selector(NSResponder.cancelOperation(_:)) else { return false }
+        hideFind()
+        return true
+    }
 
     // MARK: - Links
 

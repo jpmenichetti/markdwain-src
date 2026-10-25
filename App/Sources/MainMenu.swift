@@ -52,12 +52,11 @@ enum MainMenu {
         add(edit, "Copy", #selector(NSText.copy(_:)), "c")
         add(edit, "Select All", #selector(NSText.selectAll(_:)), "a")
         edit.addItem(.separator())
-        // WKWebView implements NSTextFinder actions itself; the tags are NSTextFinder.Action raw values
-        // (1 show find bar, 2 next, 3 previous). Nil target -> the focused web view handles them.
+        // Find is a custom bar in the viewer window (WKWebView has no built-in text-finder menu support).
         let find = submenu(edit, "Find")
-        add(find, "Find…", #selector(NSResponder.performTextFinderAction(_:)), "f", tag: 1)
-        add(find, "Find Next", #selector(NSResponder.performTextFinderAction(_:)), "g", tag: 2)
-        add(find, "Find Previous", #selector(NSResponder.performTextFinderAction(_:)), "g", [.command, .shift], tag: 3)
+        add(find, "Find…", #selector(AppDelegate.showFind(_:)), "f", target: t)
+        add(find, "Find Next", #selector(AppDelegate.findNext(_:)), "g", target: t)
+        add(find, "Find Previous", #selector(AppDelegate.findPrevious(_:)), "g", [.command, .shift], target: t)
 
         let view = submenu(bar, "View")
         add(view, "Toggle Table of Contents", #selector(AppDelegate.toggleTOC(_:)), "s", [.command, .control], target: t)

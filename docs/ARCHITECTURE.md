@@ -73,12 +73,13 @@ There are **no runtime network dependencies**: every library is a file in `Share
 - `menuNeedsUpdate`: builds Open Recent by hand. Zoom, sidebar, Reveal in Finder, Open With… actions.
 - Talks to: `ViewerWindowController`, `Prefs`, `NSWorkspace`, `NSDocumentController` (recent list only).
 
-**`MainMenu.swift`**: builds the menu bar in code. Find items use `performTextFinderAction:` which WKWebView implements itself (⌘F/⌘G/⇧⌘G).
+**`MainMenu.swift`**: builds the menu bar in code. Find items (⌘F/⌘G/⇧⌘G) target `AppDelegate`, which forwards to the key window's controller.
 
 **`ViewerWindowController.swift`**: one window per file.
 - `loadPage`: reads the file, builds the page with `PageBuilder`, writes it to `$TMPDIR/MarkDwain/<uuid>.html` and loads it with `loadFileURL(allowingReadAccessTo: "/")`.
 - `fileChanged` / `fileMissing`: called by `FileWatcher`; run JS `MarkDwain.update/setMissing`.
 - `route(href:)` and `decidePolicyFor`: link handling (flow 4). `prefsChanged`: applies `pageZoom` and sidebar state.
+- `showFind` / `find(backwards:)`: a native find bar in the titlebar area driving `WKWebView.find` (WKWebView has no built-in text-finder menu support on macOS).
 - `DropWebView`: accepts files dropped on the window. Talks to: WKWebView, FileWatcher, PageBuilder, TextLoader, AppDelegate.
 
 **`FileWatcher.swift`**: watches the file *and* its parent folder with `DispatchSource`, debounces 150 ms, re-arms on inode change, polls once a second only while the file is missing (flow 3).
