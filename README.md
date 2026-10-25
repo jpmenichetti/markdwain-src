@@ -53,7 +53,30 @@ Every file gets its own window; opening the same file again focuses its window. 
 
 The project uses an ad-hoc signature ("Sign to Run Locally"), so **no Apple account is needed**. On the Mac where this was built (macOS 26, Apple Silicon), the app launched and opened files, and `pluginkit` registered and enabled the extension with that signature; `qlmanage -p` started the extension. Nothing expires. If on your other Mac the extension doesn't show up, the fallback is to sign with a free "Personal Team" Apple ID in Xcode (such signatures expire after 7 days and need a rebuild), but this wasn't needed here.
 
-Copying the built app between Macs instead of building: `xattr -dr com.apple.quarantine /Applications/MarkDwain.app`. Quick Look may then need `pluginkit -a "/Applications/MarkDwain.app/Contents/PlugIns/MarkDwain Quick Look.appex"` and the commands above. Building on each Mac with `scripts/install.sh` is the recommended way.
+Building on each Mac with `scripts/install.sh` is the recommended way; the next section covers a Mac without Xcode.
+
+## Install on a Mac without Xcode
+
+The build is universal (Apple Silicon and Intel), so you can copy the finished app. Needs macOS 14 or newer. This was tested on a second Mac.
+
+1. **On the Mac that has the app**, make a zip (use `ditto`, not Finder's Compress, so the signature survives):
+   ```bash
+   cd /Applications && ditto -c -k --keepParent MarkDwain.app ~/Desktop/MarkDwain.zip
+   ```
+   Move the zip to the other Mac (AirDrop, USB stick, cloud drive).
+2. **On the other Mac**, double-click the zip, then drag `MarkDwain.app` into the Applications folder in Finder. (Copying with Terminal's `ditto` straight into `/Applications` can fail with "Operation not permitted" because macOS protects that folder.)
+3. In Terminal, run:
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/MarkDwain.app
+   /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/MarkDwain.app
+   pluginkit -a "/Applications/MarkDwain.app/Contents/PlugIns/MarkDwain Quick Look.appex"
+   pluginkit -e use -i local.markdwain.quicklook
+   qlmanage -r && qlmanage -r cache
+   ```
+   The `xattr` line is needed because the app has an ad-hoc signature; without it macOS says the app is damaged or from an unidentified developer. If a command says "Operation not permitted", allow Terminal under System Settings > Privacy & Security > App Management (or Full Disk Access), reopen Terminal and retry.
+4. Set MarkDwain as the default for `.md` files (see above). If Space doesn't show a preview, tick MarkDwain under System Settings > Privacy & Security > Extensions > Quick Look.
+
+After each rebuild you need to repeat the copy; with Xcode installed, `git pull && scripts/install.sh` is easier.
 
 ## Known limitations
 
