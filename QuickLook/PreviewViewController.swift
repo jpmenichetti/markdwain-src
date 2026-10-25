@@ -30,6 +30,8 @@ final class PreviewViewController: NSViewController, QLPreviewingController, WKN
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             loadContinuation = continuation
             webView.loadHTMLString(html, baseURL: nil)
+            // Safety net: never leave Quick Look spinning if the web view fails to report back.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in self?.finish() }
         }
     }
 

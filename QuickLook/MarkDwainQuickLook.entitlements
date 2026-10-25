@@ -4,4 +4,7 @@
     <!-- Quick Look extensions must be sandboxed. -->
     <key>com.apple.security.app-sandbox</key><true/>
     <key>com.apple.security.files.user-selected.read-only</key><true/>
+    <!-- WKWebView needs this even for local HTML: without it the web content process can't be set up in the
+         sandbox and the preview spins forever. The page itself loads nothing from the network. -->
+    <key>com.apple.security.network.client</key><true/>
 </dict></plist>

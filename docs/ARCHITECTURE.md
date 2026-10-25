@@ -161,7 +161,7 @@ There are **no runtime network dependencies**: every library is a file in `Share
 ## 7. Key decisions and trade-offs
 
 - **Native shell + WebView renderer.** A real Mac app gives Finder integration, windows, menus and Quick Look; rendering Markdown in JS gives GitHub-like output with mature libraries and lets the app and Quick Look share one pipeline.
-- **Not sandboxed (app).** Documents reference images and files anywhere on disk; a sandbox would need a permission prompt for each folder. The Quick Look extension *must* be sandboxed and is.
+- **Not sandboxed (app).** Documents reference images and files anywhere on disk; a sandbox would need a permission prompt for each folder. The Quick Look extension *must* be sandboxed and is. It also carries the `network.client` entitlement, because without it WKWebView cannot start inside the sandbox and the preview spins forever; the page itself makes no network requests.
 - **Page generated and loaded from a temp file.** `loadFileURL(allowingReadAccessTo: "/")` is the robust way to let `file://` pages load local images. The `<base href>` points at the document's folder.
 - **`pageZoom` for zoom.** It scales layout like Safari's zoom and keeps find and scrolling correct, unlike CSS zoom.
 - **Watching the parent folder as well as the file** because atomic saves replace the file's inode.
