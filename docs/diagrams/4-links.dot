@@ -1,0 +1,17 @@
+digraph G { bgcolor="white"; rankdir=TB; pad=0.3; node [shape=box, style="rounded,filled", fillcolor="#eef3fb", color="#1f3a68", fontname="Helvetica", fontsize=11, fontcolor="#111111"]; edge [color="#444444", fontname="Helvetica", fontsize=10, fontcolor="#111111"];
+  click [label="Click on a link in the page", fillcolor="#fff3d6"];
+  js [label="viewer.js intercepts click\n(preventDefault: page never navigates)"];
+  q1 [label="href starts with '#'?", shape=diamond, fillcolor="#ffffff"];
+  anchor [label="Scroll to heading id in page"];
+  post [label="postMessage('link', href)\nto Swift"];
+  res [label="Resolve href against the\nMarkdown file's folder"];
+  q2 [label="Scheme?", shape=diamond, fillcolor="#ffffff"];
+  ext [label="NSWorkspace.open(url)\n-> default browser / mail app"];
+  q3 [label="file: extension is\nmd / markdown / mdown / mkd?", shape=diamond, fillcolor="#ffffff"];
+  md [label="AppDelegate.open(file, anchor)\nnew window, or focus existing\nthen scroll to #anchor"];
+  other [label="NSWorkspace.open(file)\n-> system default app"];
+  safety [shape=note, fillcolor="#ffffff", label="Safety net: WKNavigationDelegate cancels\nany main-frame navigation except our page"];
+  click -> js -> q1; q1 -> anchor [label="yes"]; q1 -> post [label="no"]; post -> res -> q2;
+  q2 -> ext [label="http, https,\nmailto"]; q2 -> q3 [label="file (relative)"]; q3 -> md [label="yes"]; q3 -> other [label="no"];
+  js -> safety [style=dashed, arrowhead=none];
+}

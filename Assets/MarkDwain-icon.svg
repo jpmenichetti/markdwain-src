@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2A3A5E"/>
+      <stop offset="1" stop-color="#121A2E"/>
+    </linearGradient>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)"/>
+  <!-- M -->
+  <polyline points="276,650 276,290 512,520 748,290 748,650" fill="none" stroke="#F8FAFC" stroke-width="96" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Down arrow growing out of the M's vertex -->
+  <line x1="512" y1="520" x2="512" y2="750" stroke="#F59E0B" stroke-width="96" stroke-linecap="round"/>
+  <polyline points="432,680 512,760 592,680" fill="none" stroke="#F59E0B" stroke-width="96" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

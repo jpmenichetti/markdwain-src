@@ -1,0 +1,14 @@
+digraph G { bgcolor="white"; rankdir=TB; pad=0.3; node [shape=box, style="rounded,filled", fillcolor="#eef3fb", color="#1f3a68", fontname="Helvetica", fontsize=11, fontcolor="#111111"]; edge [color="#444444", fontname="Helvetica", fontsize=10, fontcolor="#111111"];
+  space [label="Space on a .md file in Finder", fillcolor="#fff3d6"];
+  ql [label="Quick Look finds the extension for\nnet.daringfireball.markdown"];
+  ext [label="MarkDwain Quick Look.appex starts\n(sandboxed)"];
+  prep [label="PreviewViewController.preparePreviewOfFile"];
+  load [label="TextLoader.load(maxBytes: 2 MB)", fillcolor="#dff3e3"];
+  cap [label="File larger than 2 MB?", shape=diamond, fillcolor="#ffffff"];
+  trunc [label="Keep first 2 MB,\nshow 'truncated' note"];
+  page [label="PageBuilder.html(preview: true)\nno sidebar, no <base>", fillcolor="#dff3e3"];
+  wv [label="WKWebView.loadHTMLString"];
+  js [label="Same render.js / viewer.js pipeline\n(markdown-it, hljs, DOMPurify)", fillcolor="#dff3e3"];
+  done [label="didFinish -> preview shown\n(light/dark follows system)"];
+  space -> ql -> ext -> prep -> load -> cap; cap -> trunc [label="yes"]; cap -> page [label="no"]; trunc -> page; page -> wv -> js -> done;
+}

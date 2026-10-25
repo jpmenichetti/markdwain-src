@@ -1,0 +1,16 @@
+digraph G { bgcolor="white"; rankdir=TB; pad=0.3; node [shape=box, style="rounded,filled", fillcolor="#eef3fb", color="#1f3a68", fontname="Helvetica", fontsize=11, fontcolor="#111111"]; edge [color="#444444", fontname="Helvetica", fontsize=10, fontcolor="#111111"];
+  ev [label="Filesystem event on file\nor on its parent folder", fillcolor="#fff3d6"];
+  kinds [shape=note, fillcolor="#ffffff", label="modify in place\natomic save (temp + rename)\ndelete / move away\nreappear"];
+  deb [label="Debounce 150 ms"];
+  re [label="Re-arm watches if inode changed\n(atomic saves replace the file)"];
+  st [label="stat file: mtime, size, inode", ];
+  ex [label="File exists?", shape=diamond, fillcolor="#ffffff"];
+  chg [label="Differs from last\nsignature, or was missing?", shape=diamond, fillcolor="#ffffff"];
+  miss [label="onMissing: JS setMissing(true)\nbanner 'File no longer exists'\nkeep last rendering;\npoll once per second"];
+  rend [label="onChange: re-read text,\nJS MarkDwain.update(text)"];
+  scroll [label="update() saves scrollY,\nre-renders, restores scrollY;\nbanner hidden"];
+  none [label="Ignore (nothing changed)"];
+  kinds -> ev [style=dashed, arrowhead=none];
+  ev -> deb -> re -> st -> ex; ex -> miss [label="no"]; ex -> chg [label="yes"]; chg -> rend [label="yes"]; chg -> none [label="no"]; rend -> scroll;
+  miss -> st [label="file reappears\n(poll / dir event)", style=dashed, constraint=false];
+}

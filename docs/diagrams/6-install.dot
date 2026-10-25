@@ -1,0 +1,15 @@
+digraph G { bgcolor="white"; rankdir=TB; pad=0.3; node [shape=box, style="rounded,filled", fillcolor="#eef3fb", color="#1f3a68", fontname="Helvetica", fontsize=11, fontcolor="#111111"]; edge [color="#444444", fontname="Helvetica", fontsize=10, fontcolor="#111111"];
+  start [label="scripts/install.sh", fillcolor="#fff3d6"];
+  s1 [label="1. xcodebuild available?"]; f1 [label="STOP: install Xcode from the App Store,\nopen once, xcode-select -s", fillcolor="#fbe0e0"];
+  s2 [label="2. xcodegen installed?"]; s2b [label="Homebrew installed?"]; f2 [label="STOP: install Homebrew first", fillcolor="#fbe0e0"]; s2c [label="brew install xcodegen\n(changes: Homebrew packages)"];
+  s3 [label="3. xcodegen generate\n(creates MarkDwain.xcodeproj)"];
+  s4 [label="4. xcodebuild Release, arm64 + x86_64,\nad-hoc signature\n(creates build/)"]; f4 [label="STOP: build failed;\nre-run without -quiet", fillcolor="#fbe0e0"];
+  s5 [label="5. Quit running app; replace\n/Applications/MarkDwain.app (ditto)"];
+  s6 [label="6. lsregister -f (Launch Services);\npluginkit -a / -e use (Quick Look extension)"];
+  s7 [label="7. qlmanage -r, qlmanage -r cache\n(reset Quick Look)"];
+  done [label="Done", fillcolor="#dff3e3"];
+  d1 [shape=diamond, label="ok?", fillcolor="#ffffff"]; d2 [shape=diamond, label="ok?", fillcolor="#ffffff"]; d3 [shape=diamond, label="ok?", fillcolor="#ffffff"]; d4 [shape=diamond, label="ok?", fillcolor="#ffffff"];
+  start -> s1 -> d1; d1 -> f1 [label="no"]; d1 -> s2 [label="yes"];
+  s2 -> s3 [label="yes"]; s2 -> s2b [label="no"]; s2b -> s2c [label="yes"]; s2b -> f2 [label="no"]; s2c -> s3;
+  s3 -> s4 -> d4; d4 -> f4 [label="no"]; d4 -> s5 [label="yes"]; s5 -> s6 -> s7 -> done;
+}

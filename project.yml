@@ -1,0 +1,103 @@
+# project.yml — XcodeGen spec. `xcodegen generate` creates MarkDwain.xcodeproj from this file (never edit the .xcodeproj).
+# The app name lives here (PRODUCT_NAME / CFBundleName); code reads it from the bundle at runtime.
+name: MarkDwain
+options:
+  bundleIdPrefix: local
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    # "Sign to Run Locally": ad-hoc signature, no Apple account needed.
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "-"
+    DEVELOPMENT_TEAM: ""
+    ENABLE_HARDENED_RUNTIME: NO
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  MarkDwain:
+    type: application
+    platform: macOS
+    sources:
+      - App/Sources
+      - path: App/Assets.xcassets
+      - path: App/Help.md
+      - path: Shared/Swift
+      - path: Shared/Web
+        type: folder          # copied as-is into Resources/Web (the JS/CSS the page needs)
+    dependencies:
+      - target: MarkDwainQuickLook
+        embed: true
+    settings:
+      base:
+        PRODUCT_NAME: MarkDwain
+        PRODUCT_BUNDLE_IDENTIFIER: local.markdwain
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_ENTITLEMENTS: ""   # main app is NOT sandboxed (needs free access to images/linked files)
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleName: MarkDwain
+        CFBundleDisplayName: MarkDwain
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSMinimumSystemVersion: "14.0"
+        LSApplicationCategoryType: public.app-category.productivity
+        NSHumanReadableCopyright: Personal tool
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Markdown
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Default
+            LSItemContentTypes: [net.daringfireball.markdown]
+            CFBundleTypeExtensions: [md, markdown, mdown, mkd]
+        # Importing (not exporting) the type: macOS already knows it, this just guarantees it exists with
+        # the right extensions and conformance to plain text.
+        UTImportedTypeDeclarations:
+          - UTTypeIdentifier: net.daringfireball.markdown
+            UTTypeDescription: Markdown
+            UTTypeConformsTo: [public.plain-text]
+            UTTypeTagSpecification:
+              public.filename-extension: [md, markdown, mdown, mkd]
+              public.mime-type: [text/markdown]
+  MarkDwainQuickLook:
+    type: app-extension
+    platform: macOS
+    sources:
+      - QuickLook/PreviewViewController.swift
+      - path: Shared/Swift
+      - path: Shared/Web
+        type: folder
+    settings:
+      base:
+        PRODUCT_NAME: "MarkDwain Quick Look"
+        PRODUCT_BUNDLE_IDENTIFIER: local.markdwain.quicklook
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_ENTITLEMENTS: QuickLook/MarkDwainQuickLook.entitlements
+        SKIP_INSTALL: YES
+    info:
+      path: QuickLook/Info.plist
+      properties:
+        CFBundleName: MarkDwain Quick Look
+        CFBundleDisplayName: MarkDwain Quick Look
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.quicklook.preview
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).PreviewViewController"
+          NSExtensionAttributes:
+            QLSupportedContentTypes: [net.daringfireball.markdown]
+            QLSupportsSearchableItems: false
+            QLIsDataBasedPreview: false
+schemes:
+  MarkDwain:
+    build:
+      targets:
+        MarkDwain: all
+    run:
+      config: Debug
+    archive:
+      config: Release

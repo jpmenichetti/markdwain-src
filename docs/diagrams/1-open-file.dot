@@ -1,0 +1,14 @@
+digraph G { bgcolor="white"; rankdir=TB; pad=0.3; node [shape=box, style="rounded,filled", fillcolor="#eef3fb", color="#1f3a68", fontname="Helvetica", fontsize=11, fontcolor="#111111"]; edge [color="#444444", fontname="Helvetica", fontsize=10, fontcolor="#111111"];
+  src [label="Finder double-click /\nOpen With / Dock drop /\nterminal 'open f.md'", fillcolor="#fff3d6"];
+  dlg [label="File > Open… (⌘O),\nOpen Recent, startup dialog", fillcolor="#fff3d6"];
+  drop [label="Drag onto a window", fillcolor="#fff3d6"];
+  link [label="Click on relative .md link", fillcolor="#fff3d6"];
+  open [label="AppDelegate.open(url, anchor)"];
+  key [label="key = canonical path\n(symlinks resolved)"];
+  q [label="Window for key\nalready open?", shape=diamond, fillcolor="#ffffff"];
+  focus [label="Bring window to front;\nscroll to anchor if given"];
+  create [label="Create ViewerWindowController\n(own window, no tabs)"];
+  recent [label="Add to Open Recent;\nstart FileWatcher; render"];
+  src -> open [label="application(_:open:)"]; dlg -> open; drop -> open; link -> open;
+  open -> key -> q; q -> focus [label="yes"]; q -> create [label="no"]; create -> recent;
+}

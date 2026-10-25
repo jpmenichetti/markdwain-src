@@ -1,0 +1,5 @@
+build/
+MarkDwain.xcodeproj/
+.DS_Store
+*.zip
+*.code-workspace

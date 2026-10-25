@@ -1,0 +1,14 @@
+digraph G { bgcolor="white"; rankdir=TB; pad=0.3; node [shape=box, style="rounded,filled", fillcolor="#eef3fb", color="#1f3a68", fontname="Helvetica", fontsize=11, fontcolor="#111111"]; edge [color="#444444", fontname="Helvetica", fontsize=10, fontcolor="#111111"];
+  file [label="Markdown file on disk", fillcolor="#fff3d6"];
+  read [label="TextLoader.load\nUTF-8, lossy fallback\n(Quick Look: 2 MB cap)", fillcolor="#dff3e3"];
+  html [label="PageBuilder.html\nCSS+JS inlined, <base href>\nmarkdown embedded as JSON", fillcolor="#dff3e3"];
+  web [label="WKWebView loads page\n(app: temp file + read access;\nQuick Look: loadHTMLString)"];
+  boot [label="viewer.js: MarkDwain.boot", fillcolor="#dff3e3"];
+  fm [label="render.js: split YAML front matter\n-> collapsed <details>", fillcolor="#dff3e3"];
+  md [label="markdown-it (+anchor, task lists,\nfootnotes) + highlight.js", fillcolor="#dff3e3"];
+  san [label="DOMPurify sanitize\n(scripts/styles/forms removed)", fillcolor="#dff3e3"];
+  ins [label="Insert into #content", fillcolor="#dff3e3"];
+  toc [label="Build TOC from h1-h4,\nscroll spy", fillcolor="#dff3e3"];
+  theme [label="CSS prefers-color-scheme\npicks light/dark + hljs theme", fillcolor="#dff3e3"];
+  file -> read -> html -> web -> boot -> fm -> md -> san -> ins -> toc; ins -> theme;
+}
